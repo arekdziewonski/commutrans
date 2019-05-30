@@ -1,5 +1,7 @@
 package commutrans
 
+import java.util.concurrent.Executors
+
 import cats.effect.{ConcurrentEffect, ContextShift, Timer}
 import cats.implicits._
 import fs2.Stream
@@ -7,12 +9,17 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.middleware.Logger
+import org.http4s.server.staticcontent.webjarService
 import fs2.Stream
+import org.http4s.server.staticcontent.WebjarService.Config
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.global
 
 object CommutransServer {
 
   def stream[F[_]: ConcurrentEffect](implicit T: Timer[F], C: ContextShift[F]): Stream[F, Nothing] = {
+    implicit val contextShift = C
     for {
       client <- BlazeClientBuilder[F](global).stream
       helloWorldAlg = HelloWorld.impl[F]

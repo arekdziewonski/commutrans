@@ -1,9 +1,15 @@
 package commutrans
 
-import cats.effect.Sync
+import java.util.concurrent.Executors
+
+import cats.effect.{ContextShift, Effect, IO, Sync}
 import cats.implicits._
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.staticcontent
+import org.http4s.server.staticcontent.WebjarService.Config
+
+import scala.concurrent.ExecutionContext
 
 object CommutransRoutes {
 
@@ -29,5 +35,11 @@ object CommutransRoutes {
           resp <- Ok(greeting)
         } yield resp
     }
+  }
+
+  val webjars: HttpRoutes[IO] = {
+    val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))
+    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+    staticcontent.webjarService(Config(blockingEc))
   }
 }
