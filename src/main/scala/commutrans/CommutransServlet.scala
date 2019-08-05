@@ -7,5 +7,4 @@ class CommutransServlet extends ScalatraServlet {
   get("/") {
     views.html.hello()
   }
-
 }
